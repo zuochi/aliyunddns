@@ -134,9 +134,10 @@ public class AliyunDomainUpdateApp {
 
         for (String ipUrl : getIpUrls) {
             try {
-                if (oldIp.equals(this.getIpByUrl(ipUrl))) {
-                    usefulIpUrls.add(ipUrl);
-                }
+//                if (oldIp.equals(this.getIpByUrl(ipUrl))) {
+//                    usefulIpUrls.add(ipUrl);
+//                }
+                usefulIpUrls.add(ipUrl);
             } catch (Exception e) {
                 e.printStackTrace();
             }
