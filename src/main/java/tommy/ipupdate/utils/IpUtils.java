@@ -5,7 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author fengjianxin
  * @version 2018/5/17.
  */
 public class IpUtils {
