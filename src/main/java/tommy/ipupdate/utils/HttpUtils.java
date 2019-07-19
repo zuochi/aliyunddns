@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @author fengjianxin
  * @version 2018/5/17.
  */
 public class HttpUtils {
