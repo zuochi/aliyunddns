@@ -22,8 +22,10 @@ import tommy.ipupdate.utils.IpUtils;
 import tommy.ipupdate.utils.PropertiesUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsResponse.*;
 
@@ -33,17 +35,23 @@ public class AliyunDomainUpdateApp {
     private IAcsClient client;
     private String oldIp;
     private String domainName;
+    private List<String> subDomains;
     private String regionId;
     private String accessKeyId;
     private String accessKeySecret;
     private List<String> usefulIpUrls;
     private long ipCheckInterval = Long.valueOf(PropertiesUtils.get("app.update.domain.check.ip.interval"));
 
-    public AliyunDomainUpdateApp(String domainName, String regionId, String accessKeyId, String accessKeySecret) {
+    public AliyunDomainUpdateApp(String domainName, String subDomainsStr, String regionId, String accessKeyId, String accessKeySecret) {
         this.domainName = domainName;
         this.regionId = regionId;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
+        if (StringUtils.isNotBlank(subDomainsStr)) {
+            this.subDomains = Arrays.asList(subDomainsStr.split(","));
+        } else {
+            this.subDomains = new ArrayList<>();
+        }
 
         IClientProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
         try {
@@ -59,10 +67,10 @@ public class AliyunDomainUpdateApp {
     }
 
     public static void main(String[] args) throws ClientException {
-
         try {
             AliyunDomainUpdateApp app = new AliyunDomainUpdateApp(
                     PropertiesUtils.get("app.update.domain.name"),
+                    PropertiesUtils.get("app.update.subDomains"),
                     PropertiesUtils.get("app.update.domain.regionId"),
                     PropertiesUtils.get("app.update.domain.accessKeyId"),
                     PropertiesUtils.get("app.update.domain.accessKeySecret"));
@@ -170,13 +178,11 @@ public class AliyunDomainUpdateApp {
         List<Record> domainRecords = this.getDomainRecords();
         if (CollectionUtil.isNotEmpty(domainRecords)) {
             for (Record domainRecord : domainRecords) {
-                if ("A".equals(domainRecord.getType())) {
-                    if (newIp.equals(domainRecord.getValue())) {
-                        log("updateDomainRecord 发现阿里解析ip与变更的新ip已经一致，无需更改，更新oldIp -> " + newIp);
-                        this.oldIp = newIp;
-                    } else {
-                        this.updateDomainRecordByDomainRecord(newIp, domainRecord);
-                    }
+                if (newIp.equals(domainRecord.getValue())) {
+                    log("updateDomainRecord 发现阿里解析ip与变更的新ip已经一致，无需更改，更新oldIp -> " + newIp);
+                    this.oldIp = newIp;
+                } else {
+                    this.updateDomainRecordByDomainRecord(newIp, domainRecord);
                 }
             }
         }
@@ -233,7 +239,16 @@ public class AliyunDomainUpdateApp {
         describeDomainRecordsRequest.setProtocol(ProtocolType.HTTPS); //指定访问协议
         describeDomainRecordsRequest.setAcceptFormat(FormatType.JSON); //指定api返回格式
         describeDomainRecordsRequest.setMethod(MethodType.POST); //指定请求方法
-        return this.getClient().getAcsResponse(describeDomainRecordsRequest).getDomainRecords();
+        List<Record> records = this.getClient().getAcsResponse(describeDomainRecordsRequest).getDomainRecords();
+        // 排除非指定的
+        records = records.stream()
+                .filter(record -> subDomains.isEmpty() || subDomains.contains(String.format("%s.%s", record.getRR(), record.getDomainName())))
+                .filter(record -> record.getType().equals("A"))
+                .collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(records)) {
+            records.forEach(record -> log("getDomainRecords: " + String.format("%s.%s", record.getRR(), record.getDomainName())));
+        }
+        return records;
     }
 
     public void updateDomainRecordByDomainRecord(String newIp, Record domainRecord) throws ClientException {

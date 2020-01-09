@@ -17,9 +17,13 @@
 
 ## conf.properties说明
 * app.update.domain.name 域名名称，如 baidu.com
+* app.update.subDomains 支持只对特定子域名生效,英文逗号隔开，如  www.baidu.com,bjh.baidu.com,pic.baidu.com
 * app.update.domain.regionId  对应阿里云的访问机房节点ID 
 * app.update.domain.accessKeyId  阿里云accessKey 
 * app.update.domain.accessKeySecret  阿里云accessKeySecret 
 * app.update.domain.check.ip.interval 检查公网ip间隔 
 * app.getip.urls 内置抓取公网IP的网站，多个用英文都好隔开（但会优先使用 app.getip.urls.raw 中的网站
-* app.getip.urls.raw 远程接口/文件（支持读github文件），抓取公网IP的网站，需要的返回格式为字符串数组，如： ["http://123","https://abc"] 
+* app.getip.urls.raw 远程接口/文件（支持读github文件），抓取公网IP的网站，需要的返回格式为字符串数组，如： ["http://123","https://abc"]
+
+## Update Log
+* 2020/1/9 新增 app.update.subDomains 配置参数
