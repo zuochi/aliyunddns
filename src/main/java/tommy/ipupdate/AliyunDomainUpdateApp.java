@@ -80,6 +80,7 @@ public class AliyunDomainUpdateApp {
         }
     }
 
+    // 執行
     public void execute() throws InterruptedException {
 
         this.updateOldIp();
