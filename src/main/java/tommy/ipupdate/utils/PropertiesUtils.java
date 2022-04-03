@@ -16,9 +16,15 @@ public class PropertiesUtils {
         InputStream inStream = PropertiesUtils.class.getClassLoader().getResourceAsStream("conf.properties");
         try {
             props.load(inStream);
-            inStream.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                assert inStream != null;
+                inStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
