@@ -9,12 +9,12 @@ import java.util.regex.Pattern;
  */
 public class IpUtils {
 
-    private static final Pattern ipPattern = Pattern.compile("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+    private static final Pattern ipPatternA = Pattern.compile("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
                     + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
                     + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
                     + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\:\\d{1,5}$");
 
-    private static final Pattern ipPattern2 = Pattern.compile("((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)");
+    private static final Pattern ipPatternB = Pattern.compile("((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)");
 
     /**
      * 校验是否合法的IP带端口的格式
@@ -22,7 +22,7 @@ public class IpUtils {
      * @return 合法返回 true, 否则返回 false
      */
     public static boolean checkIpWithPort(String ip) {
-        return ipPattern.matcher(ip).matches();
+        return ipPatternA.matcher(ip).matches();
     }
 
     /**
@@ -31,7 +31,7 @@ public class IpUtils {
      * @return
      */
     public static String getFirstIp(String ipStr) {
-        Matcher m = ipPattern2.matcher(ipStr);
+        Matcher m = ipPatternB.matcher(ipStr);
         while (m.find()) {
             return m.group();
         }
@@ -58,8 +58,7 @@ public class IpUtils {
 
         Random rdint = new Random();
         int index = rdint.nextInt(10);
-        String ip = num2ip(range[index][0] + new Random().nextInt(range[index][1] - range[index][0]));
-        return ip;
+        return num2ip(range[index][0] + new Random().nextInt(range[index][1] - range[index][0]));
     }
 
     /*
@@ -67,14 +66,10 @@ public class IpUtils {
      */
     public static String num2ip(int ip) {
         int[] b = new int[4];
-        String x = "";
-
-        b[0] = (int) ((ip >> 24) & 0xff);
-        b[1] = (int) ((ip >> 16) & 0xff);
-        b[2] = (int) ((ip >> 8) & 0xff);
-        b[3] = (int) (ip & 0xff);
-        x = Integer.toString(b[0]) + "." + Integer.toString(b[1]) + "." + Integer.toString(b[2]) + "." + Integer.toString(b[3]);
-
-        return x;
+        b[0] = (ip >> 24) & 0xff;
+        b[1] = (ip >> 16) & 0xff;
+        b[2] = (ip >> 8) & 0xff;
+        b[3] = ip & 0xff;
+        return b[0] + "." + b[1] + "." + b[2] + "." + b[3];
     }
 }
